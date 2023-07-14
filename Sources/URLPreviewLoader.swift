@@ -63,7 +63,11 @@ class URLPreviewLoader: NSObject, WKNavigationDelegate {
             print("[URLPreviewLoader] loadWebPage with url \(url.absoluteString)")
             
             let webView = WKWebView()
-            webView.configuration.defaultWebpagePreferences.allowsContentJavaScript = true
+            if #available(iOS 14.0, *) {
+                webView.configuration.defaultWebpagePreferences.allowsContentJavaScript = true
+            } else {
+                // Fallback on earlier versions
+            }
             webView.navigationDelegate = self
             
             self.parsingURL = url

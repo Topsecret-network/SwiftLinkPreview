@@ -122,6 +122,10 @@
 		98F76D3B1D3B1C9F00E9B10E /* PreviewError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98348AC11D09FC58003FA2B3 /* PreviewError.swift */; };
 		98F76D3C1D3B1C9F00E9B10E /* SwiftLinkPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98348ABC1D09B794003FA2B3 /* SwiftLinkPreview.swift */; };
 		98F76D3D1D3B1C9F00E9B10E /* Regex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98348AC71D0A00DF003FA2B3 /* Regex.swift */; };
+		C4E4A48E2A60E65800CF4E82 /* URLPreviewLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4E4A48D2A60E65800CF4E82 /* URLPreviewLoader.swift */; };
+		C4E4A48F2A60E65800CF4E82 /* URLPreviewLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4E4A48D2A60E65800CF4E82 /* URLPreviewLoader.swift */; };
+		C4E4A4902A60E65800CF4E82 /* URLPreviewLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4E4A48D2A60E65800CF4E82 /* URLPreviewLoader.swift */; };
+		C4E4A4912A60E65800CF4E82 /* URLPreviewLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4E4A48D2A60E65800CF4E82 /* URLPreviewLoader.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -196,6 +200,7 @@
 		98F76D261D3AFC9700E9B10E /* Info-tvOS.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "Info-tvOS.plist"; sourceTree = "<group>"; };
 		98F76D281D3AFCA200E9B10E /* Info-tvOS.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "Info-tvOS.plist"; sourceTree = "<group>"; };
 		98F76D2F1D3B1C3100E9B10E /* SwiftLinkPreview.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftLinkPreview.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		C4E4A48D2A60E65800CF4E82 /* URLPreviewLoader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = URLPreviewLoader.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -336,6 +341,7 @@
 		98C545961D2B32870003A74E /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				C4E4A48D2A60E65800CF4E82 /* URLPreviewLoader.swift */,
 				98348AC11D09FC58003FA2B3 /* PreviewError.swift */,
 				98348ABC1D09B794003FA2B3 /* SwiftLinkPreview.swift */,
 				7A552DE121A460910019E8B1 /* Response.swift */,
@@ -718,6 +724,7 @@
 				9272A1051E2EC11000F9F17E /* Cache.swift in Sources */,
 				9851A6951D11B83000B39FCD /* NSURLSessionExtension.swift in Sources */,
 				7A552DE721A466EB0019E8B1 /* ResponseExtension.swift in Sources */,
+				C4E4A48E2A60E65800CF4E82 /* URLPreviewLoader.swift in Sources */,
 				7A552DE221A460910019E8B1 /* Response.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -755,6 +762,7 @@
 				9272A1081E2EC11000F9F17E /* Cache.swift in Sources */,
 				98E7C3181D3B247D009E5F6D /* StringExtension.swift in Sources */,
 				7A552DEA21A466EB0019E8B1 /* ResponseExtension.swift in Sources */,
+				C4E4A4912A60E65800CF4E82 /* URLPreviewLoader.swift in Sources */,
 				7A552DE521A460910019E8B1 /* Response.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -791,6 +799,7 @@
 				9272A1061E2EC11000F9F17E /* Cache.swift in Sources */,
 				98F76CFE1D3AF73100E9B10E /* Regex.swift in Sources */,
 				7A552DE821A466EB0019E8B1 /* ResponseExtension.swift in Sources */,
+				C4E4A48F2A60E65800CF4E82 /* URLPreviewLoader.swift in Sources */,
 				7A552DE321A460910019E8B1 /* Response.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -827,6 +836,7 @@
 				9272A1071E2EC11000F9F17E /* Cache.swift in Sources */,
 				98F76D3D1D3B1C9F00E9B10E /* Regex.swift in Sources */,
 				7A552DE921A466EB0019E8B1 /* ResponseExtension.swift in Sources */,
+				C4E4A4902A60E65800CF4E82 /* URLPreviewLoader.swift in Sources */,
 				7A552DE421A460910019E8B1 /* Response.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
