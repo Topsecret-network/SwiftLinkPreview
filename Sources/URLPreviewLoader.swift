@@ -17,7 +17,6 @@
 import Foundation
 import UIKit
 import WebKit
-import JavaScriptCore
 
 typealias CompletionHandler<T> = ((T) -> Void)
 
@@ -40,9 +39,10 @@ extension URLPreviewLoader {
 class URLPreviewLoader: NSObject, WKNavigationDelegate {
     static let shareInstance: URLPreviewLoader = URLPreviewLoader()
     
+    private var timeoutTimer: Timer?
     private var waitParseURL: [URL] = []
     private var parsingURL: URL?
-    private var webViews: [WKWebView] = []
+    private var webView: WKWebView?
     private var completionHandlersMap: [String: [CompletionHandler<String?>]] = [:]
     
     func loadWebPage(from url: URL, completion: @escaping CompletionHandler<String?>) {
@@ -80,17 +80,22 @@ class URLPreviewLoader: NSObject, WKNavigationDelegate {
                 mainWindow.addSubview(webView)
             }
             
-            self.webViews.append(webView)
+            self.webView = webView
+            self.stopTimer()
+            self.startTimer()
         }
     }
     
-    func parsingWaitingURL(with webView: WKWebView) {
-        if let url = waitParseURL.first {
+    func parsingWaitingURL() {
+        stopTimer()
+        if let webView = self.webView,
+            let url = waitParseURL.first {
             self.waitParseURL.removeFirst()
             self.parsingURL = url
             print("[URLPreviewLoader] parsingWaitingURL: \(url.absoluteString), waitCount: \(self.waitParseURL.count)")
             let request = URLRequest(url: url)
             webView.load(request)
+            startTimer()
         }
     }
 
@@ -98,28 +103,41 @@ class URLPreviewLoader: NSObject, WKNavigationDelegate {
         webView.evaluateJavaScript("document.documentElement.outerHTML") { [weak self] (result, error) in
             DispatchQueue.main.async {
                 guard let self = self else { return }
-                guard let url = self.parsingURL,
-                      let completionHandlers = self.completionHandlersMap[url.absoluteString],
-                      completionHandlers.count > 0 else {
-                    print("[URLPreviewLoader] didFinish but no completionHandler with url \(self.parsingURL?.absoluteString ?? "")")
+                guard error == nil else {
+                    self.completionHandlerResult(with: nil)
                     return
                 }
-                print("[URLPreviewLoader] didFinish url \(url.absoluteString)")
-                
-                self.parsingURL = nil
-                self.completionHandlersMap.removeValue(forKey: url.absoluteString)
-                self.parsingWaitingURL(with: webView)
-                guard let htmlString = result as? String else {
-                    completionHandlers.forEach({
-                        $0(nil)
-                    })
-                    return
-                }
-                completionHandlers.forEach({
-                    $0(htmlString)
-                })
+                self.completionHandlerResult(with: result as? String)
             }
         }
+    }
+    
+    func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+        print("[URLPreviewLoader] didFail error \(error.localizedDescription) data:\(Date())")
+        completionHandlerResult(with: nil)
+    }
+    
+    func completionHandlerResult(with htmlString: String?) {
+        guard let url = self.parsingURL,
+              let completionHandlers = self.completionHandlersMap[url.absoluteString],
+              completionHandlers.count > 0 else {
+            print("[URLPreviewLoader] didFinish but no completionHandler with url \(self.parsingURL?.absoluteString ?? "")")
+            return
+        }
+        print("[URLPreviewLoader] didFinish url \(url.absoluteString), htmlString is nil\(htmlString == nil), data:\(Date())")
+        
+        self.parsingURL = nil
+        self.completionHandlersMap.removeValue(forKey: url.absoluteString)
+        self.parsingWaitingURL()
+        guard let htmlString = htmlString else {
+            completionHandlers.forEach({
+                $0(nil)
+            })
+            return
+        }
+        completionHandlers.forEach({
+            $0(htmlString)
+        })
     }
     
     func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
@@ -132,4 +150,33 @@ class URLPreviewLoader: NSObject, WKNavigationDelegate {
         }
         completionHandler(disposition, credential)
     }
+}
+
+// MARK: Timer
+extension URLPreviewLoader {
+    
+    func startTimer() {
+        guard let parsingURL = self.parsingURL else {
+            return
+        }
+        print("[URLPreviewLoader] startTimer \(parsingURL.absoluteString), data:\(Date())")
+        let timeoutInterval: TimeInterval = 30.0
+        timeoutTimer = Timer.scheduledTimer(timeInterval: timeoutInterval, target: self, selector: #selector(timeoutReached), userInfo: nil, repeats: false)
+    }
+    
+    @objc func timeoutReached() {
+        guard let parsingURL = self.parsingURL else {
+            return
+        }
+        print("[URLPreviewLoader] timeoutReached url \(parsingURL.absoluteString), data:\(Date())")
+        self.completionHandlerResult(with: nil)
+    }
+
+    func stopTimer() {
+        guard let timeoutTimer = timeoutTimer else { return }
+        print("[URLPreviewLoader] stopTimer \(self.parsingURL?.absoluteString ?? ""), data:\(Date())")
+        timeoutTimer.invalidate()
+        self.timeoutTimer = nil
+    }
+    
 }
