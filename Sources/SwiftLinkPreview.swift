@@ -137,6 +137,7 @@ open class SwiftLinkPreview: NSObject {
                                 result.icon = $0.icon
                                 result.video = $0.video
                                 result.price = $0.price
+                                result.site = $0.site
 
                                 self.cache.slp_setCachedResponse(url: unshortened.absoluteString, response: result)
                                 self.cache.slp_setCachedResponse(url: url.absoluteString, response: result)
@@ -258,7 +259,11 @@ extension SwiftLinkPreview {
             if error != nil {
                 self.workQueue.async {
                     if !cancellable.isCancelled {
-                        onError(.cannotBeOpened("\(url.absoluteString): \(error.debugDescription)"))
+                        if url.absoluteString.isNeedLoadWebLink() {
+                            completion( url )
+                        } else {
+                            onError(.cannotBeOpened("\(url.absoluteString): \(error.debugDescription)"))
+                        }
                     }
                 }
                 task = nil
@@ -342,7 +347,25 @@ extension SwiftLinkPreview {
             }
         }
     }
-
+    
+    fileprivate func loadURLPreview(response: Response, cancellable: Cancellable, completion: @escaping (Response) -> Void, onError: @escaping (PreviewError) -> Void) {
+        guard !cancellable.isCancelled, let url = response.finalUrl else { return }
+        
+        guard let sourceUrl = url.scheme == "http" || url.scheme == "https" ? url: URL( string: "http://\(url)" )
+            else {
+                if !cancellable.isCancelled { onError(.invalidURL(url.absoluteString)) }
+                return
+        }
+        let htmlString = URLPreviewLoader.shareInstance.synchronousPreviewLoader(with: url)
+        if let htmlString = htmlString {
+            if !cancellable.isCancelled {
+                self.parseHtmlString(htmlString, response: response, completion: completion)
+            }
+        } else {
+            onError(.cannotBeOpened(sourceUrl.absoluteString))
+        }
+    }
+    
     // Extract HTML code and the information contained on it
     fileprivate func extractInfo(response: Response, cancellable: Cancellable, completion: @escaping (Response) -> Void, onError: @escaping (PreviewError) -> Void) {
 
@@ -371,6 +394,8 @@ extension SwiftLinkPreview {
             result.image = url.absoluteString
 
             completion(result)
+        } else if url.absoluteString.isNeedLoadWebLink() {
+            loadURLPreview(response: response, cancellable: cancellable, completion: completion, onError: onError)
         } else {
 
             guard let sourceUrl = url.scheme == "http" || url.scheme == "https" ? url: URL( string: "http://\(url)" )
@@ -531,6 +556,7 @@ extension SwiftLinkPreview {
         var result = result
 
         let possibleTags: [String] = [
+            Response.Key.site.rawValue,
             Response.Key.title.rawValue,
             Response.Key.description.rawValue,
             Response.Key.image.rawValue,
@@ -639,13 +665,14 @@ extension SwiftLinkPreview {
 
             }
         } else {
-                let values = Regex.pregMatchAll(htmlCode, regex: Regex.secondaryImageTagPattern, index: 2)
+                let values = Regex.pregMatchAll(htmlCode, regex: Regex.secondaryImageTagPattern, index: 2).filter({ return $0.isOpenGraphImage() })
                 if !values.isEmpty {
+                    let images = values
                     result.images = values
                     result.image = values.first
                 }
                 else{
-                    result.images = [self.addImagePrefixIfNeeded(mainImage ?? String(), result: result)]
+                    result.images = [self.addImagePrefixIfNeeded(mainImage ?? String(), result: result)].filter({ return $0.isOpenGraphImage() })
                 }
         }
         return result

@@ -22,6 +22,7 @@ internal extension Response {
         responseData["icon"] = icon
         responseData["video"] = video
         responseData["price"] = price
+        responseData["site"] = site
         return responseData
     }
     
@@ -36,6 +37,7 @@ internal extension Response {
         case icon
         case video
         case price
+        case site
     }
     
     mutating func set(_ value: Any, for key: Key) {
@@ -60,6 +62,8 @@ internal extension Response {
             if let value = value as? String { self.video = value }
         case Key.price:
             if let value = value as? String { self.price = value }
+        case Key.site:
+            if let value = value as? String { self.site = value }
         }
     }
     
@@ -85,6 +89,8 @@ internal extension Response {
             return self.video
         case Key.price:
             return self.price
+        case Key.site:
+            return self.site
         }
     }
 }

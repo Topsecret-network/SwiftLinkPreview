@@ -108,12 +108,23 @@ extension String {
 
         return false
     }
+    
+    func isNeedLoadWebLink() -> Bool {
+        let possible = ["twitter.com", "mp.weixin"]
+        for p in possible where self.contains(p) {
+            return true
+        }
+        return false
+    }
 
     func isOpenGraphImage() -> Bool {
         return Regex.test(self, regex: Regex.openGraphImagePattern)
     }
      
     func isVideo() -> Bool {
+        if self.contains("youtube") {
+            return true
+        }
         let possible = ["mp4", "mov", "mpeg", "avi", "m3u8"]
         if let url = URL(string: self),
            possible.contains(url.pathExtension) {
