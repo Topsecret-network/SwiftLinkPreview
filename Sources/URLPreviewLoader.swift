@@ -49,7 +49,8 @@ class URLPreviewLoader: NSObject, WKNavigationDelegate {
         DispatchQueue.main.async {
             guard self.parsingURL == nil else {
                 print("[URLPreviewLoader] loadWebPage url need wait: \(url.absoluteString), waitCount: \(self.waitParseURL.count)")
-                if self.parsingURL?.absoluteString == url.absoluteString,
+                if (self.parsingURL?.absoluteString == url.absoluteString ||
+                    self.waitParseURL.contains(where: { return $0.absoluteString == url.absoluteString})),
                    var completionHandlers = self.completionHandlersMap[url.absoluteString] {
                     completionHandlers.append(completion)
                     self.completionHandlersMap[url.absoluteString] = completionHandlers
@@ -124,7 +125,7 @@ class URLPreviewLoader: NSObject, WKNavigationDelegate {
             print("[URLPreviewLoader] didFinish but no completionHandler with url \(self.parsingURL?.absoluteString ?? "")")
             return
         }
-        print("[URLPreviewLoader] didFinish url \(url.absoluteString), htmlString is nil\(htmlString == nil), data:\(Date())")
+        print("[URLPreviewLoader] didFinish url \(url.absoluteString), htmlString is nil:\(htmlString == nil), data:\(Date())")
         
         self.parsingURL = nil
         self.completionHandlersMap.removeValue(forKey: url.absoluteString)
