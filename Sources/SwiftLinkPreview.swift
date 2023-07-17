@@ -675,6 +675,12 @@ extension SwiftLinkPreview {
                     result.images = [self.addImagePrefixIfNeeded(mainImage ?? String(), result: result)].filter({ return $0.isOpenGraphImage() })
                 }
         }
+        
+        if let image = result.image,
+            image.hasPrefix("//") {
+            result.image  = "https:" + image
+        }
+        
         return result
     }
     
