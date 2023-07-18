@@ -664,16 +664,6 @@ extension SwiftLinkPreview {
                 }
 
             }
-        } else {
-                let values = Regex.pregMatchAll(htmlCode, regex: Regex.secondaryImageTagPattern, index: 2).filter({ return $0.isOpenGraphImage() })
-                if !values.isEmpty {
-                    let images = values
-                    result.images = values
-                    result.image = values.first
-                }
-                else{
-                    result.images = [self.addImagePrefixIfNeeded(mainImage ?? String(), result: result)].filter({ return $0.isOpenGraphImage() })
-                }
         }
         
         if let image = result.image,
