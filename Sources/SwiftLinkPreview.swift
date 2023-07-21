@@ -653,15 +653,17 @@ extension SwiftLinkPreview {
                 if !values.isEmpty {
                     result.images = values
                     result.image = values.first
-                } else {
-                    // If no OpenGraph image found pick any from <img/> tag to show.
-                    let values = Regex.pregMatchAll(htmlCode, regex: Regex.imageTagPattern, index: 2)
-                    if !values.isEmpty {
-                        let imgs = values.map { self.addImagePrefixIfNeeded($0, result: result) }
-                        result.images = imgs
-                        result.image = imgs.first
-                    }
                 }
+                // do not parse <img/> tag to show
+//                else {
+//                    // If no OpenGraph image found pick any from <img/> tag to show.
+//                    let values = Regex.pregMatchAll(htmlCode, regex: Regex.imageTagPattern, index: 2)
+//                    if !values.isEmpty {
+//                        let imgs = values.map { self.addImagePrefixIfNeeded($0, result: result) }
+//                        result.images = imgs
+//                        result.image = imgs.first
+//                    }
+//                }
 
             }
         }
