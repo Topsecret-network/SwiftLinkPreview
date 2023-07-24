@@ -576,8 +576,7 @@ extension SwiftLinkPreview {
                     metatag.range(of: "itemprop=\"\(tag)") != nil ||
                     metatag.range(of: "itemprop='\(tag)") != nil) {
 
-                    if let key = Response.Key(rawValue: tag),
-                        result.value(for: key) == nil {
+                    if let key = Response.Key(rawValue: tag) {
                         if let value = Regex.pregMatchFirst(metatag, regex: Regex.metatagContentPattern, index: 2) {
                             let value = value.decoded.extendedTrim
                             if tag == "image" {
