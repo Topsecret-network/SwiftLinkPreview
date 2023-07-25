@@ -245,7 +245,11 @@ extension SwiftLinkPreview {
 
     // Unshorten URL by following redirections
     fileprivate func unshortenURL(_ url: URL, cancellable: Cancellable, completion: @escaping (URL) -> Void, onError: @escaping (PreviewError) -> Void) {
-
+        guard !url.absoluteString.isNeedLoadWebLink() else {
+            completion(url)
+            return
+        }
+        
         if cancellable.isCancelled {return}
 
         var task: URLSessionDataTask?
@@ -348,6 +352,24 @@ extension SwiftLinkPreview {
         }
     }
     
+    fileprivate func loadURLMetadata(response: Response, cancellable: Cancellable, completion: @escaping (Response) -> Void, onError: @escaping (PreviewError) -> Void) {
+        guard !cancellable.isCancelled, let url = response.finalUrl else { return }
+        
+        guard let sourceUrl = url.scheme == "http" || url.scheme == "https" ? url: URL( string: "http://\(url)" )
+            else {
+                if !cancellable.isCancelled { onError(.invalidURL(url.absoluteString)) }
+                return
+        }
+        let res = LPMetadataProviderTool.shareInstance.synchronousLoadMetadata(response: response, with: url)
+        if let res = res {
+            if !cancellable.isCancelled {
+               completion(res)
+            }
+        } else {
+            onError(.cannotBeOpened(sourceUrl.absoluteString))
+        }
+    }
+    
     fileprivate func loadURLPreview(response: Response, cancellable: Cancellable, completion: @escaping (Response) -> Void, onError: @escaping (PreviewError) -> Void) {
         guard !cancellable.isCancelled, let url = response.finalUrl else { return }
         
@@ -395,7 +417,7 @@ extension SwiftLinkPreview {
 
             completion(result)
         } else if url.absoluteString.isNeedLoadWebLink() {
-            loadURLPreview(response: response, cancellable: cancellable, completion: completion, onError: onError)
+            loadURLMetadata(response: response, cancellable: cancellable, completion: completion, onError: onError)
         } else {
 
             guard let sourceUrl = url.scheme == "http" || url.scheme == "https" ? url: URL( string: "http://\(url)" )
