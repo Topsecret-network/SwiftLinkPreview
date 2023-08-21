@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 
-	s.ios.deployment_target = '11.0'
-	s.platform         = :ios, '11.0'
+	s.ios.deployment_target = '13.0'
+	s.platform         = :ios, '13.0'
 	s.name = "TSSwiftLinkPreview"
 	s.summary = "It makes a preview from an url, grabbing all the information such as title, relevant texts and images."
 	s.requires_arc = true
