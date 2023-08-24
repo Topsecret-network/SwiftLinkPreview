@@ -39,12 +39,12 @@ open class SwiftLinkPreview: NSObject {
     public let responseQueue: DispatchQueue
     public let cache: Cache
 
-    public static let defaultWorkQueue = DispatchQueue.global(qos: .userInitiated)
+    public static let defaultWorkQueue = DispatchQueue.global(qos: .default)
 
     // MARK: - Constructor
 
     //Swift-only init with default parameters
-    @nonobjc public init(session: URLSession = URLSession.shared, workQueue: DispatchQueue = SwiftLinkPreview.defaultWorkQueue, responseQueue: DispatchQueue = DispatchQueue.main, cache: Cache = DisabledCache.instance) {
+    @nonobjc public init(session: URLSession = URLSession.shared, workQueue: DispatchQueue = SwiftLinkPreview.defaultWorkQueue, responseQueue: DispatchQueue = DispatchQueue.global(qos: .userInitiated), cache: Cache = DisabledCache.instance) {
         self.workQueue = workQueue
         self.responseQueue = responseQueue
         self.cache = cache
@@ -117,35 +117,30 @@ open class SwiftLinkPreview: NSObject {
                 if let result = self.cache.slp_getCachedResponse(url: url.absoluteString) {
                     successResponseQueue(result)
                 } else {
-
-                    self.unshortenURL(url, cancellable: cancellable, completion: { unshortened in
-                        if let result = self.cache.slp_getCachedResponse(url: unshortened.absoluteString) {
-                            successResponseQueue(result)
-                        } else {
+                    if let result = self.cache.slp_getCachedResponse(url: url.absoluteString) {
+                        successResponseQueue(result)
+                    } else {
+                        var result = Response()
+                        result.url = url
+                        result.finalUrl = self.extractInURLRedirectionIfNeeded(url)
+                        result.canonicalUrl = self.extractCanonicalURL(url)
+                        self.loadURLMetadata(response: result, cancellable: cancellable, completion: {
                             
-                            var result = Response()
-                            result.url = url
-                            result.finalUrl = self.extractInURLRedirectionIfNeeded(unshortened)
-                            result.canonicalUrl = self.extractCanonicalURL(unshortened)
-
-                            self.extractInfo(response: result, cancellable: cancellable, completion: {
-
-                                result.title = $0.title
-                                result.description = $0.description
-                                result.image = $0.image
-                                result.images = $0.images
-                                result.icon = $0.icon
-                                result.video = $0.video
-                                result.price = $0.price
-                                result.site = $0.site
-
-                                self.cache.slp_setCachedResponse(url: unshortened.absoluteString, response: result)
-                                self.cache.slp_setCachedResponse(url: url.absoluteString, response: result)
-
-                                successResponseQueue(result)
-                            }, onError: errorResponseQueue)
-                        }
-                    }, onError: errorResponseQueue)
+                            result.title = $0.title
+                            result.description = $0.description
+                            result.image = $0.image
+                            result.images = $0.images
+                            result.icon = $0.icon
+                            result.video = $0.video
+                            result.price = $0.price
+                            result.site = $0.site
+                            
+                            self.cache.slp_setCachedResponse(url: url.absoluteString, response: result)
+                            self.cache.slp_setCachedResponse(url: url.absoluteString, response: result)
+                            
+                            successResponseQueue(result)
+                        }, onError: errorResponseQueue)
+                    }
                 }
             }
         } else {
